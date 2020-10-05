@@ -459,11 +459,22 @@ function drawFactionRunemark(image)
     drawImageSrc(position, size, image);
 }
 
+function drawFactionWatermark(image)
+{
+    var position = scalePixelPosition({x: 975, y: 100});
+    var size = scalePixelPosition({x: 800, y: 800});
+    drawImageSrc(position, size, image);
+}
+
 render = function(fighterData) {
     drawBackground();
 
     drawModel(fighterData.imageUrl, fighterData.imageProperties);
     drawFactionRunemark(fighterData.factionRunemark);
+
+    if (document.getElementById("addWatermark").checked) {
+        drawFactionWatermark(fighterData.factionRunemark);
+    }
 
     getContext().font = "92px RodchenkoCTT";
     getContext().fillStyle = "white";
