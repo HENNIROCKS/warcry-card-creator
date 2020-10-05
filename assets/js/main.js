@@ -37,7 +37,8 @@ getBackgroundImage = function() {
 
 drawBackground = function() {
     getContext().drawImage(
-        getBackgroundImage(), 0, 0, getCanvas().width, getCanvas().height);
+        getBackgroundImage(), 0, 0, getCanvas().width, getCanvas().height
+    );
 }
 
 scalePixelPosition = function(pixelPosition) {
@@ -468,17 +469,16 @@ function drawFactionWatermark(image)
 
 render = function(fighterData) {
     drawBackground();
-
     drawModel(fighterData.imageUrl, fighterData.imageProperties);
     drawFactionRunemark(fighterData.factionRunemark);
 
-    if (document.getElementById("addWatermark").checked) {
+    if (document.getElementById("addWatermark").checked)
+    {
         drawFactionWatermark(fighterData.factionRunemark);
     }
 
     getContext().font = "92px RodchenkoCTT";
     getContext().fillStyle = "white";
-
     getContext().textBaseline = "middle";
     getContext().textAlign = "left";
 
