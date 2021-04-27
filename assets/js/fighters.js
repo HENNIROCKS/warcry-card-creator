@@ -1,3 +1,7 @@
+isAltCard = function(){
+  return document.getElementById('select-bg-alt').checked;
+}
+
 writeValue = function(ctx, value, pos) {
     var scale = getScalingFactor(getCanvas(), getBackgroundImage());
     pos = {x: pos.x / scale.x, y: pos.y / scale.y };
@@ -9,10 +13,13 @@ writeValue = function(ctx, value, pos) {
 }
 
 getScalingFactor = function(canvas, warcryCardOne) {
+    return {x:1,y:1}
+/*
     return {
         x: canvas.width  / warcryCardOne.width,
         y: canvas.height / warcryCardOne.height
     };
+*/
 }
 
 getCanvas = function() {
@@ -23,28 +30,53 @@ getContext = function() {
     return getCanvas().getContext("2d");
 }
 
+getNearBackgroundImage = function() {
+  let bg = $("input[type='radio'][name='toggle-backgrounds']:checked")[0].id;
+
+  return document.getElementById(bg.replace('select-','')+"-near");
+}
+
+getFarBackgroundImage = function() {
+  let bg = $("input[type='radio'][name='toggle-backgrounds']:checked")[0].id;
+
+  return document.getElementById(bg.replace('select-','') + "-far");
+
+}
+
 getBackgroundImage = function() {
-    if (document.getElementById('select-bg-dark-102').checked) {
-        return document.getElementById('bg-dark-102');
 
-    } else if (document.getElementById('select-bg-dark-112').checked) {
-        return document.getElementById('bg-dark-112');
+    let bg = $("input[type='radio'][name='toggle-backgrounds']:checked")[0].id;
+    return document.getElementById(bg.replace('select-',''));
 
-    } else if (document.getElementById('select-bg-dark-302').checked) {
-        return document.getElementById('bg-dark-302');
+}
 
-    } else if (document.getElementById('select-bg-dark-312').checked) {
-        return document.getElementById('bg-dark-312');
+drawFarBackground = function() {
+  getContext().fillStyle = "white";
+ getContext().clearRect(0, 0, canvas.width, canvas.height);
 
-    } else if (document.getElementById('select-bg-fire-102').checked) {
-        return document.getElementById('bg-fire-102');
+  let background = getFarBackgroundImage();
+  if (!background) return 0;
+  let width = getCanvas().width;
+  let height = getCanvas().height;
 
-    } else if (document.getElementById('select-bg-fire-112').checked) {
-        return document.getElementById('bg-fire-112');
+  if (isAltCard())
+    height = width / 2.307;
 
-    } else if (document.getElementById('select-bg-light-102').checked) {
-        return document.getElementById('bg-light-102');
-    }
+    getContext().drawImage( background, 0, 0, width, height);
+
+  return 1;
+}
+
+drawNearBackground = function() {
+  let background = getNearBackgroundImage();
+  if (!background) return;
+
+  let width = getCanvas().width;
+  let height = getCanvas().height;
+  if (isAltCard())
+    height = width / 2.307;
+
+    getContext().drawImage(background, 0, 0, width, height);
 }
 
 drawBackground = function() {
@@ -72,6 +104,7 @@ drawCardElementFromInputId = function(inputId, pixelPosition) {
     drawCardElementFromInput(document.getElementById(inputId), pixelPosition);
 }
 
+// put all these values into an array so we can have different card types
 drawToughness = function(value) {
     writeScaled(value, {x: 545, y: 391});
 }
@@ -103,6 +136,52 @@ drawWeaponStatblock = function(pixelPosition) {
         scaledSize.x,
         scaledSize.y);
 }
+
+drawWeaponAltBackground = function(){
+  var image = document.getElementById("weapon-profile-alt-2");
+  var position = {x:65,y:230}
+  var scaledPosition = scalePixelPosition(position);
+  //var scaledSize = scalePixelPosition({x: image.width, y: image.height});
+  var scaledSize = scalePixelPosition({x: 932, y: 484});
+  getContext().drawImage(
+      image,
+      scaledPosition.x,
+      scaledPosition.y,
+      scaledSize.x,
+      scaledSize.y);
+    //getContext().drawImage( image,0,0,1772,1241);
+}
+
+drawWeaponAlt = function(weaponData,pos,background){
+
+  // weapon rune
+  var position = scalePixelPosition({x: pos.x, y: pos.y});
+  var size = scalePixelPosition({x: 150, y: 150});
+  drawImageSrc(position, size, weaponData.runemark);
+
+  // weapon range
+  var range = (weaponData.rangeMin > 0 ? (weaponData.rangeMin + "-") : "") + weaponData.rangeMax;
+  getContext().textAlign = "center";
+  writeScaled(range, {x: pos.x + 260, y: pos.y+100});
+
+  // weapon attacks
+  writeScaled(
+      weaponData.attacks,
+      {x: pos.x + 435, y:pos.y+100});
+
+
+  //weapon strength
+  writeScaled(
+      weaponData.strength,
+      {x: pos.x + 630, y: pos.y+100});
+
+  //weapon damage
+  writeScaled(
+      weaponData.damageBase + "/" + weaponData.damageCrit,
+      {x: pos.x + 805, y: pos.y+100});//800
+
+}
+
 
 drawWeapon = function(weaponData, pixelPosition) {
     drawWeaponStatblock(pixelPosition);
@@ -213,6 +292,49 @@ function setSelectedFactionRunemark(runemark) {
     setSelectedRunemark($('#factionRunemarkSelect')[0], runemark, "faction", "black");
 }
 
+function cropFighterName(name, length){
+  let names = [];
+  let add = '', jump = 0;;
+    while(name.length > length){
+      let i = length;
+      add = ''; jump = 0;
+      while( i>0 && name[i]!=' ' && name[i]!='-') i--;
+      if (i == 0){ i = length; add = '-';}
+      if (name[i] == ' ') jump = 1;
+      names.push(name.slice(0,i)+add);
+      name = name.slice(i+jump)
+    }
+    names.push(name);
+    return names;
+}
+
+function drawFighterNameAlt(){
+  let name = cropFighterName(document.getElementById('fighterName')
+                             .value.toUpperCase(),16);
+  //  .match(/.{1,20}/g);
+  let pos = scalePixelPosition({x:65, y:80})
+  let fontSize = 100;
+  if (name.length == 2){ pos = scalePixelPosition({x:65, y:38});}
+  if (name.length > 2 ){ pos = scalePixelPosition({x:65, y:30}); fontSize = 70}
+
+  getContext().font = ""+fontSize+"px SinaNovaReg";
+  let ctx = getContext();
+  ctx.save();
+  ctx.textBaseline = "top";
+  ctx.textAlign = "left";
+  for(let i = 0; i<name.length;i++){
+    ctx.renderText(name[i], pos.x, pos.y, 5);
+    //ctx.fillText(name[i], pos.x, pos.y);
+    pos.y += fontSize;
+  }
+
+  ctx.restore();
+  //let name = $('fighter-name').value;
+  //let position = scalePixelPosition({x:20, y:20})
+//  writeValue(name, value, position);
+}
+
+
 function drawImage(scaledPosition, scaledSize, image)
 {
     if (image != null)
@@ -238,11 +360,35 @@ function drawImageSrc(scaledPosition, scaledSize, imageSrc)
     }
 }
 
+
+function drawTagRunemarksAlt(fighterData){
+    var positions = [{x: 1025, y: 230}, {x: 1025, y: 398}, {x: 1025, y: 576}];
+    img = $("#circle-alt-small")[0];
+    for (i = 0; i < fighterData.tagRunemarks.length; i++) {
+      let position = scalePixelPosition(positions[i]);
+      let size = scalePixelPosition({x: 150, y: 150});
+      getContext().drawImage(img, position.x, position.y, size.x, size.y);
+
+      position = scalePixelPosition({x: positions[i].x + 25, y: positions[i].y + 30});
+      size = scalePixelPosition({x: 100, y: 100});
+      drawImageSrc(position, size, fighterData.tagRunemarks[i]);
+    }
+}
+
+
 function drawTagRunemark(index, runemark) {
     var positions = [{x: 575, y: 550}, {x: 750, y: 550}, {x: 662.5, y: 400}];
+    var runepositions = [{x: 575, y: 550}, {x: 750, y: 550}, {x: 662.5, y: 400}];
+
     if (index >= positions.length) return;
 
     var img = $("#circle")[0];
+    if (isAltCard()){
+      positions = [{x: 595, y: 590}, {x: 790, y: 590}, {x: 692.5, y: 450}];
+
+      img = $("#circle-alt-small")[0];
+
+    }
 
     var position = scalePixelPosition(positions[index]);
     var size = scalePixelPosition({x: 160, y: 160});
@@ -253,12 +399,36 @@ function drawTagRunemark(index, runemark) {
     drawImageSrc(position, size, runemark);
 }
 
+function drawModelBack(fighterData,callback){
+
+    if (fighterData.imageUrl != null)
+    {
+        var image = new Image();
+        image.onload = function(){
+            var position = scalePixelPosition({x: 590 + fighterData.imageProperties.offsetX, y: fighterData.imageProperties.offsetY});
+            var scale = fighterData.imageProperties.scalePercent/100.0;
+            var width = image.width * scale;
+            var height = image.height * scale;
+            getContext().drawImage(image, position.x, position.y, width, height);
+
+            URL.revokeObjectURL(image.src);
+            callback(fighterData);
+        };
+        image.src = fighterData.imageUrl;
+
+    }else{  //draw rest if no fighter image
+      callback(fighterData)
+    }
+}
+
+
+
 function drawModel(imageUrl, imageProps)
 {
     if (imageUrl != null)
     {
         var image = new Image();
-        image.onload = function(){
+        image.onload = function(callback){
             var position = scalePixelPosition({x: 590 + imageProps.offsetX, y: imageProps.offsetY});
             var scale = imageProps.scalePercent/100.0;
             var width = image.width * scale;
@@ -464,8 +634,26 @@ function readControls()
     data.tagRunemarks = readTagRunemarks();
     data.weapon1 = readWeaponControls("#weapon1");
     data.weapon2 = readWeaponControls("#weapon2");
-
     return data;
+}
+
+function drawFactionRunemarkAlt(image){
+
+  let bg = $("#circle-alt")[0];
+    let position = scalePixelPosition({x: 1176, y: 50});
+    let size = scalePixelPosition({x: 220, y: 220});
+    getContext().drawImage(bg, position.x, position.y, size.x, size.y);
+
+    position = scalePixelPosition({x: 1206, y: 78});
+    size = scalePixelPosition({x: 160, y: 160});
+    drawImageSrc(position, size, image);
+  //  //draw background circle
+  //  let background = $("#circle-alt")[0];
+  //  console.log(background);
+  //  var position = scalePixelPosition({x: 1176, y: 50});
+  //  var size = scalePixelPosition({x: 210, y: 280});
+  //  drawImageSrc(position, size, background);
+  //  drawImageSrc(position, size, image);
 }
 
 function drawFactionRunemark(image)
@@ -475,10 +663,74 @@ function drawFactionRunemark(image)
     drawImageSrc(position, size, image);
 }
 
-render = function(fighterData) {
-    drawBackground();
 
-    drawModel(fighterData.imageUrl, fighterData.imageProperties);
+// pass second part of rendering as callback after model is drawn
+render = function(fighterData) {
+
+    fighterData.bgseperate = drawFarBackground();
+    if (!fighterData.bgseperate) drawBackground();
+    drawModelBack(fighterData,renderAfterModel)
+
+}
+
+cropCard = function() {
+  let ctx = getContext();
+  ctx.clearRect(0, 0, canvas.width, 100);// top
+  ctx.clearRect(0, 0, 100, 600);// left
+  ctx.clearRect(canvas.width-100,0, 100, 600);// right
+  ctx.clearRect(0, 600, canvas.width, canvas.height-600); // bottom
+}
+
+//when middle model picture is drawn, complete
+renderAfterModel = function(fighterData){
+  if (isAltCard()){
+
+    cropCard();
+    if (fighterData.bgseperate) drawNearBackground();
+    drawFighterNameAlt();
+    drawFactionRunemarkAlt(fighterData.factionRunemark);
+
+    getContext().font = "70px rodchenkoctt";
+    getContext().fillStyle = "black";
+
+    getContext().textBaseline = "middle"; //middle, right, left
+    getContext().textAlign = "center";
+
+    writeScaled(fighterData.move, {x: 1310, y: 642});         // move
+    writeScaled(fighterData.toughness, {x: 1486, y: 642});    // toughness
+    getContext().textAlign = "left";
+    writeScaled(fighterData.wounds, {x: 1620, y: 642});       // wounds
+
+    getContext().textAlign = "center";
+    getContext().fillStyle = "white";
+
+    writeScaled(fighterData.pointCost, {x: 1612, y: 166});    // point cost
+
+    getContext().font = "70px rodchenkoctt";
+    getContext().textBaseline = "top";
+    getContext().textAlign = "left";
+    getContext().fillStyle = "black";
+    // draw weapons
+    if (fighterData.weapon1.enabled && fighterData.weapon2.enabled) {
+      //drawWeaponAlt = function(weaponData,pos){
+        drawWeaponAltBackground();
+
+        drawWeaponAlt(fighterData.weapon1, {x: 93, y: 290})
+        drawWeaponAlt(fighterData.weapon2, {x: 93, y: 522})
+
+    }else if (fighterData.weapon1.enabled){
+          drawWeaponAlt(fighterData.weapon1, {x: 93, y: 290})
+
+    }else if (fighterData.weapon2.enabled){
+          drawWeaponAlt(fighterData.weapon2, {x: 93, y: 290})
+    }
+
+    drawTagRunemarksAlt(fighterData);
+
+  } else { //original card size
+
+    if (fighterData.bgseperate) drawNearBackground();
+
     drawFactionRunemark(fighterData.factionRunemark);
 
     getContext().font = "92px rodchenkoctt";
@@ -507,22 +759,25 @@ render = function(fighterData) {
 
     if (fighterData.weapon1.enabled && fighterData.weapon2.enabled)
     {
-        drawWeapon(fighterData.weapon1, {x: 50, y: 750}); // Default was x:29, y:397
-        drawWeapon(fighterData.weapon2, {x: 50, y: 950}); // Default was x:29, y:564
+          drawWeapon(fighterData.weapon1, {x: 50, y: 750}); // Default was x:29, y:397
+          drawWeapon(fighterData.weapon2, {x: 50, y: 950}); // Default was x:29, y:564
     }
     else if (fighterData.weapon1.enabled)
     {
-        drawWeapon(fighterData.weapon1, {x: 50, y: 850}); // Default was x:29, y:463
+      drawWeapon(fighterData.weapon1, {x: 50, y: 850}); // Default was x:29, y:463
     }
     else if (fighterData.weapon2.enabled)
     {
-        drawWeapon(fighterData.weapon2, {x: 50, y: 850}); // Default was x:29, y:463
+      drawWeapon(fighterData.weapon2, {x: 50, y: 850}); // Default was x:29, y:463
     }
+
     for (i = 0; i < fighterData.tagRunemarks.length; i++)
     {
         drawTagRunemark(i, fighterData.tagRunemarks[i]);
     }
+  }
 }
+
 
 function writeControls(fighterData)
 {
@@ -888,8 +1143,9 @@ function onDeleteClicked()
 // …
 // …
 
-function saveCardAsImage() {
+function saveCardAsImage_old() {
     var element = document.createElement('a');
+
     element.setAttribute('href', document.getElementById('canvas').toDataURL('image/png'));
     element.setAttribute('download', 'warcry-fighter-card.png');
     element.style.display = 'none';
@@ -898,6 +1154,30 @@ function saveCardAsImage() {
     document.body.removeChild(element);
 }
 
+// alter for small card cropping
+function saveCardAsImage() {
+
+    var canvas = document.getElementById('canvas')
+    var tempCanvas;
+    if (isAltCard()){
+        tempCanvas = document.createElement("canvas");
+        let tCtx = tempCanvas.getContext("2d");
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = 770;
+        tCtx.drawImage(canvas,0,0);
+    }else{
+        tempCanvas = document.getElementById('canvas')
+    }
+
+    var element = document.createElement('a');
+
+    element.setAttribute('href', tempCanvas.toDataURL('image/png'));
+    element.setAttribute('download', 'warcry-fighter-card.png');
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
 $(document).ready(function() {
     var c=document.getElementById('canvas');
     var ctx=c.getContext('2d');
