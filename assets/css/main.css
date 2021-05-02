@@ -13,6 +13,13 @@
          url("../fonts/rodchenkoctt.svg#rodchenkoctt") format("svg");
 }
 
+@font-face {
+    font-family: 'SinaNovaReg';
+    src: url("../fonts/SinaNovaReg-webfont.woff2") format('woff2'),
+         url("../fonts/SinaNovaReg-webfont.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
 /* @media (prefers-color-scheme: dark) {
     a, .btn-link { color: tomato; }
 }
