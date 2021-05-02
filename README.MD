@@ -1,6 +1,7 @@
-# Warcry Card Creator 2.0 – Fighters and Abilities
+# Warcry Card Creator 3.0 – Fighters and Abilities
+A fork of [@HENNIROCKS's work](https://github.com/HENNIROCKS/warcry-card-creator). [Stevrak] added another smaller card type, some image stuff and hopes to do more.
 
-A fork of [@rachelnertia's work](https://github.com/rachelnertia/warcry-card-creator). Further development and graphics (except runemarks) by [HENNIROCKS](https://hendrik-berends.de/en). Additional work by [@dorb4n](https://github.com/dorb4n), much appreciated! Made with [Bootswatch](https://bootswatch.com), supporting dark and light mode.
+The project was started by by @rachelnertia (https://github.com/rachelnertia/warcry-card-creator). Further development and graphics (except runemarks) by [HENNIROCKS](https://hendrik-berends.de/en). Additional work by [@dorb4n](https://github.com/dorb4n), much appreciated! Made with [Bootswatch](https://bootswatch.com), supporting dark and light mode. Thanks everyone!
 
 [Creative Commons](http://creativecommons.org/licenses/by-nc/4.0/)
 
