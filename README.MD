@@ -2,7 +2,9 @@
 
 ****
 
-Newer versions by [@barrysheppard](https://barrysheppard.github.io/warcry-card-creator/) and [@stevrak](https://stevrak.github.io/warcry_legions).
+Warcry Card Creator 2026 
+https://hennirocks.github.io/warcry-card-creator-2026/
+https://github.com/HENNIROCKS/warcry-card-creator-2026
 
 ****
 
